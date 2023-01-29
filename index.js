@@ -1,23 +1,59 @@
 /* Your Code Here */
+function createEmployeeRecord(employeeArray) {
+    return {
+      firstName: employeeArray[0],
+      familyName: employeeArray[1],
+      title: employeeArray[2],
+      payPerHour: employeeArray[3],
+      timeInEvents: [],
+      timeOutEvents: []
+    }
+  }
 
-/*
- We're giving you this function. Take a look at it, you might see some usage
- that's new and different. That's because we're avoiding a well-known, but
- sneaky bug that we'll cover in the next few lessons!
+  function createEmployeeRecords(arr) {
+    return arr.map(record => createEmployeeRecord(record))
+  }
 
- As a result, the lessons for this function will pass *and* it will be available
- for you to use if you need it!
- */
+  function createTimeInEvent(empRecord, date) {
+    const newTimeInEvent = {
+      type: "TimeIn",
+      hour: parseInt(date.slice(-4)),
+      date: date.slice(0, 10)
+    }
+    empRecord.timeInEvents.push(newTimeInEvent)
+    return empRecord
+  }
 
-const allWagesFor = function () {
-    const eligibleDates = this.timeInEvents.map(function (e) {
-        return e.date
-    })
+  function createTimeOutEvent(empRecord, date) {
+    const newTimeOutEvent = {
+      type: "TimeOut",
+      hour: parseInt(date.slice(-4)),
+      date: date.slice(0, 10)
+    }
+    empRecord.timeOutEvents.push(newTimeOutEvent)
+    return empRecord
+  }
 
-    const payable = eligibleDates.reduce(function (memo, d) {
-        return memo + wagesEarnedOnDate.call(this, d)
-    }.bind(this), 0) // <== Hm, why did we need to add bind() there? We'll discuss soon!
+  function hoursWorkedOnDate(empRecord, date) {
+    const timeIn = empRecord.timeInEvents.find(event => event.date === date);
+    const timeOut = empRecord.timeOutEvents.find(event => event.date === date);
+    return (timeOut.hour - timeIn.hour)/100;
+  }
 
-    return payable
-}
+  function wagesEarnedOnDate(empRecord, date) {
+    return hoursWorkedOnDate(empRecord, date) * empRecord.payPerHour;
+  }
 
+  function allWagesFor(empRecord) {
+    const allWages = empRecord.timeInEvents.map(event => wagesEarnedOnDate(empRecord, event.date));
+    return allWages.reduce((total, wage) => total + wage);
+  }
+
+  function calculatePayroll(empRecords) {
+    const totalForEachEmployee = empRecords.map(record => allWagesFor(record))
+    return totalForEachEmployee.reduce((total, empTotal) => total + empTotal)
+  }
+
+  function findEmployeeByFirstName(src, name) {
+    return src.find(record => record.firstName === name);
+  }
